@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>일정 목록</title>
+</head>
+<body>
+    <h1>내 일정</h1>
+    <a href="/schedule/new">일정 추가</a>
+    <form action="/logout" method="post">
+        <button type="submit">로그아웃</button>
+    </form>
+
+    <table>
+        <tr>
+            <th>제목</th>
+            <th>시작일</th>
+            <th>종료일</th>
+            <th>상태</th>
+            <th>관리</th>
+        </tr>
+        <tr th:each="schedule : ${schedules}">
+            <td th:text="${schedule.title}"></td>
+            <td th:text="${schedule.startDate}"></td>
+            <td th:text="${schedule.endDate}"></td>
+            <td th:text="${schedule.status}"></td>
+            <td>
+                <a th:href="@{/schedule/{id}/edit(id=${schedule.id})}">수정</a>
+                <form th:action="@{/schedule/{id}/delete(id=${schedule.id})}" method="post" style="display:inline">
+                    <button type="submit">삭제</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+
+    <h2>일정 공유</h2>
+    <form th:each="schedule : ${schedules}" th:action="@{/schedule/{id}/share(id=${schedule.id})}" method="post">
+        <span th:text="${schedule.title}"></span>
+        <input type="email" name="email" placeholder="공유할 이메일">
+        <select name="role">
+            <option value="VIEWER">보기</option>
+            <option value="EDITOR">편집</option>
+        </select>
+        <button type="submit">공유</button>
+    </form>
+    
+    <h2>공유받은 일정</h2>
+	<table>
+	    <tr>
+	        <th>제목</th>
+	        <th>시작일</th>
+	        <th>종료일</th>
+	        <th>상태</th>
+	        <th>작성자</th>
+	        <th>권한</th>
+	        <th>관리</th>
+	    </tr>
+	    <tr th:each="schedule : ${sharedSchedules}">
+	        <td th:text="${schedule.title}"></td>
+	        <td th:text="${schedule.startDate}"></td>
+	        <td th:text="${schedule.endDate}"></td>
+	        <td th:text="${schedule.status}"></td>
+	        <td th:text="${schedule.member.name}"></td>
+	        <td th:text="${shareRoles[schedule.id]}"></td>
+	        <td>
+	            <a th:if="${shareRoles[schedule.id].name() == 'EDITOR'}"
+	               th:href="@{/schedule/{id}/edit(id=${schedule.id})}">수정</a>
+	            <form th:if="${shareRoles[schedule.id].name() == 'EDITOR'}"
+	                  th:action="@{/schedule/{id}/delete(id=${schedule.id})}" method="post" style="display:inline">
+	                <button type="submit">삭제</button>
+	            </form>
+	        </td>
+	    </tr>
+	</table>
+</body>
+</html>

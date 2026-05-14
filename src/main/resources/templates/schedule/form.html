@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>일정 추가</title>
+</head>
+<body>
+    <h1>일정 추가</h1>
+    <form action="/schedule/new" method="post">
+        <input type="text" name="title" placeholder="제목">
+        <textarea name="description" placeholder="내용"></textarea>
+        <input type="date" name="startDate">
+        <input type="date" name="endDate">
+        <button type="submit">저장</button>
+    </form>
+    <a href="/schedule">목록으로</a>
+</body>
+</html>
