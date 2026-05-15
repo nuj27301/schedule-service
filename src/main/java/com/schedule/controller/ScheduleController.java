@@ -28,16 +28,22 @@ public class ScheduleController {
     public String list(@AuthenticationPrincipal UserDetails user, Model model) {
         List<Schedule> schedules = scheduleService.getMySchedules(user.getUsername());
         List<Schedule> sharedSchedules = scheduleService.getSharedSchedules(user.getUsername());
-        
+
         Map<Long, ScheduleShare.ShareRole> shareRoles = new HashMap<>();
         sharedSchedules.forEach(schedule -> {
             ScheduleShare.ShareRole role = scheduleService.getShareRole(schedule.getId(), user.getUsername());
             shareRoles.put(schedule.getId(), role);
         });
-        
+
+        // 달력용 전체 일정 합치기
+        List<Schedule> allSchedules = new java.util.ArrayList<>();
+        allSchedules.addAll(schedules);
+        allSchedules.addAll(sharedSchedules);
+
         model.addAttribute("schedules", schedules);
         model.addAttribute("sharedSchedules", sharedSchedules);
         model.addAttribute("shareRoles", shareRoles);
+        model.addAttribute("allSchedules", allSchedules);
         return "schedule/list";
     }
     

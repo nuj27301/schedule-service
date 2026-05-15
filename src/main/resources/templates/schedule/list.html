@@ -3,74 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <title>일정 목록</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f5f0e8;
+            --surface: #fdfaf4;
+            --navy: #1a2744;
+            --navy-light: #2d3f6b;
+            --accent: #c8a96e;
+            --text: #2c2c2c;
+            --muted: #8a8a8a;
+            --border: #e0d8c8;
+            --shadow: 0 4px 24px rgba(26, 39, 68, 0.08);
+            --todo: #e8f0fe;
+            --todo-text: #1a2744;
+            --progress: #fff3cd;
+            --progress-text: #856404;
+            --done: #d4edda;
+            --done-text: #155724;
+        }
+
+        body {
+            background: var(--bg);
+            min-height: 100vh;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+        }
+
+        .header {
+            background: var(--navy);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.7rem;
+            align-items: center;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: var(--navy);
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.2rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.2s;
+            display: inline-block;
+        }
+
+        .btn:hover { opacity: 0.85; }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 0.5rem 1.2rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+        .btn-danger {
+            background: transparent;
+            color: #cc3333;
+            border: 1px solid #ffcccc;
+            border-radius: 6px;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover { background: #fff0f0; }
+
+        .btn-edit {
+            background: transparent;
+            color: var(--navy);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.78rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-edit:hover { background: var(--bg); }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--navy);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--navy);
+            color: white;
+            padding: 0.8rem 1rem;
+            font-size: 0.78rem;
+            font-weight: 500;
+            text-align: left;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        tr:hover td { background: var(--bg); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-TODO { background: var(--todo); color: var(--todo-text); }
+        .status-IN_PROGRESS { background: var(--progress); color: var(--progress-text); }
+        .status-DONE { background: var(--done); color: var(--done-text); }
+
+        .actions { display: flex; gap: 0.5rem; align-items: center; }
+
+        .empty {
+            text-align: center;
+            padding: 3rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .share-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .share-row {
+            display: flex;
+            gap: 0.7rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 0.7rem;
+        }
+
+        .share-label {
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-weight: 500;
+            min-width: 120px;
+        }
+
+        input[type="email"],
+        select {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 0.8rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="email"]:focus,
+        select:focus { border-color: var(--navy); }
+
+        .btn-share {
+            background: var(--navy);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-share:hover { background: var(--navy-light); }
+    </style>
 </head>
 <body>
-    <h1>내 일정</h1>
-    <a href="/schedule/new">일정 추가</a>
-    <form action="/logout" method="post">
-        <button type="submit">로그아웃</button>
-    </form>
 
-    <table>
-        <tr>
-            <th>제목</th>
-            <th>시작일</th>
-            <th>종료일</th>
-            <th>상태</th>
-            <th>관리</th>
-        </tr>
-        <tr th:each="schedule : ${schedules}">
-            <td th:text="${schedule.title}"></td>
-            <td th:text="${schedule.startDate}"></td>
-            <td th:text="${schedule.endDate}"></td>
-            <td th:text="${schedule.status}"></td>
-            <td>
-                <a th:href="@{/schedule/{id}/edit(id=${schedule.id})}">수정</a>
-                <form th:action="@{/schedule/{id}/delete(id=${schedule.id})}" method="post" style="display:inline">
-                    <button type="submit">삭제</button>
-                </form>
-            </td>
-        </tr>
-    </table>
+<div class="header">
+    <h1>Planify</h1>
+    <div class="header-actions">
+        <a href="/schedule/new" class="btn">+ 일정 추가</a>
+        <form action="/logout" method="post" style="display:inline">
+            <button type="submit" class="btn-outline">로그아웃</button>
+        </form>
+    </div>
+</div>
 
-    <h2>일정 공유</h2>
-    <form th:each="schedule : ${schedules}" th:action="@{/schedule/{id}/share(id=${schedule.id})}" method="post">
-        <span th:text="${schedule.title}"></span>
-        <input type="email" name="email" placeholder="공유할 이메일">
-        <select name="role">
-            <option value="VIEWER">보기</option>
-            <option value="EDITOR">편집</option>
-        </select>
-        <button type="submit">공유</button>
-    </form>
-    
-    <h2>공유받은 일정</h2>
-	<table>
-	    <tr>
-	        <th>제목</th>
-	        <th>시작일</th>
-	        <th>종료일</th>
-	        <th>상태</th>
-	        <th>작성자</th>
-	        <th>권한</th>
-	        <th>관리</th>
-	    </tr>
-	    <tr th:each="schedule : ${sharedSchedules}">
-	        <td th:text="${schedule.title}"></td>
-	        <td th:text="${schedule.startDate}"></td>
-	        <td th:text="${schedule.endDate}"></td>
-	        <td th:text="${schedule.status}"></td>
-	        <td th:text="${schedule.member.name}"></td>
-	        <td th:text="${shareRoles[schedule.id]}"></td>
-	        <td>
-	            <a th:if="${shareRoles[schedule.id].name() == 'EDITOR'}"
-	               th:href="@{/schedule/{id}/edit(id=${schedule.id})}">수정</a>
-	            <form th:if="${shareRoles[schedule.id].name() == 'EDITOR'}"
-	                  th:action="@{/schedule/{id}/delete(id=${schedule.id})}" method="post" style="display:inline">
-	                <button type="submit">삭제</button>
-	            </form>
-	        </td>
-	    </tr>
-	</table>
+<div class="container">
+
+    <div class="section-title">내 일정</div>
+
+    <div class="card">
+        <table>
+            <tr>
+                <th>제목</th>
+                <th>시작일</th>
+                <th>종료일</th>
+                <th>상태</th>
+                <th>관리</th>
+            </tr>
+            <tr th:if="${#lists.isEmpty(schedules)}">
+                <td colspan="5" class="empty">등록된 일정이 없습니다</td>
+            </tr>
+            <tr th:each="schedule : ${schedules}">
+                <td th:text="${schedule.title}"></td>
+                <td th:text="${schedule.startDate}"></td>
+                <td th:text="${schedule.endDate}"></td>
+                <td>
+                    <span class="status-badge"
+                          th:classappend="'status-' + ${schedule.status}"
+                          th:text="${schedule.status == T(com.schedule.entity.Schedule.ScheduleStatus).TODO ? '할 일' :
+                                    schedule.status == T(com.schedule.entity.Schedule.ScheduleStatus).IN_PROGRESS ? '진행 중' : '완료'}">
+                    </span>
+                </td>
+                <td>
+                    <div class="actions">
+                        <a class="btn-edit" th:href="@{/schedule/{id}/edit(id=${schedule.id})}">수정</a>
+                        <form th:action="@{/schedule/{id}/delete(id=${schedule.id})}" method="post">
+                            <button type="submit" class="btn-danger">삭제</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-title">일정 공유</div>
+
+    <div th:each="schedule : ${schedules}" class="share-section">
+        <div class="share-label" th:text="${schedule.title}"></div>
+        <form th:action="@{/schedule/{id}/share(id=${schedule.id})}" method="post">
+            <div class="share-row">
+                <input type="email" name="email" placeholder="공유할 이메일">
+                <select name="role">
+                    <option value="VIEWER">보기</option>
+                    <option value="EDITOR">편집</option>
+                </select>
+                <button type="submit" class="btn-share">공유</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="section-title">공유받은 일정</div>
+
+    <div class="card">
+        <table>
+            <tr>
+                <th>제목</th>
+                <th>시작일</th>
+                <th>종료일</th>
+                <th>상태</th>
+                <th>작성자</th>
+                <th>권한</th>
+                <th>관리</th>
+            </tr>
+            <tr th:if="${#lists.isEmpty(sharedSchedules)}">
+                <td colspan="7" class="empty">공유받은 일정이 없습니다</td>
+            </tr>
+            <tr th:each="schedule : ${sharedSchedules}">
+                <td th:text="${schedule.title}"></td>
+                <td th:text="${schedule.startDate}"></td>
+                <td th:text="${schedule.endDate}"></td>
+                <td>
+                    <span class="status-badge"
+                          th:classappend="'status-' + ${schedule.status}"
+                          th:text="${schedule.status == T(com.schedule.entity.Schedule.ScheduleStatus).TODO ? '할 일' :
+                                    schedule.status == T(com.schedule.entity.Schedule.ScheduleStatus).IN_PROGRESS ? '진행 중' : '완료'}">
+                    </span>
+                </td>
+                <td th:text="${schedule.member.name}"></td>
+                <td th:text="${shareRoles[schedule.id]}"></td>
+                <td>
+                    <div class="actions">
+                        <a class="btn-edit"
+                           th:if="${shareRoles[schedule.id].name() == 'EDITOR'}"
+                           th:href="@{/schedule/{id}/edit(id=${schedule.id})}">수정</a>
+                        <form th:if="${shareRoles[schedule.id].name() == 'EDITOR'}"
+                              th:action="@{/schedule/{id}/delete(id=${schedule.id})}" method="post">
+                            <button type="submit" class="btn-danger">삭제</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+	<div class="section-title">캘린더</div>
+	
+	    <div class="card" style="padding: 1.5rem;">
+	        <div id="calendar"></div>
+	    </div>
+
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script th:inline="javascript">
+    const events = [];
+    /*[# th:each="s : ${allSchedules}"]*/
+    events.push({
+        title: /*[[${s.title}]]*/ '',
+        start: /*[[${s.startDate}]]*/ '',
+        end: /*[[${s.endDate}]]*/ '',
+        backgroundColor: /*[[${s.member.id == #authentication.principal.username ? '#1a2744' : '#c8a96e'}]]*/ '#1a2744',
+        borderColor: 'transparent'
+    });
+    /*[/]*/
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'ko',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            events: events,
+            eventClick: function(info) {
+                alert(info.event.title);
+            }
+        });
+        calendar.render();
+    });
+</script>
 </body>
 </html>
