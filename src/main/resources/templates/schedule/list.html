@@ -368,13 +368,13 @@
 <script th:inline="javascript">
     const events = [];
     /*[# th:each="s : ${allSchedules}"]*/
-    events.push({
-        title: /*[[${s.title}]]*/ '',
-        start: /*[[${s.startDate}]]*/ '',
-        end: /*[[${s.endDate}]]*/ '',
-        backgroundColor: /*[[${s.member.id == #authentication.principal.username ? '#1a2744' : '#c8a96e'}]]*/ '#1a2744',
-        borderColor: 'transparent'
-    });
+	    events.push({
+	    title: /*[[${s.title}]]*/ '',
+	    start: /*[[${s.startDate}]]*/ '',
+	    end: /*[[${s.endDate != null ? s.endDate.plusDays(1) : s.startDate}]]*/ '',
+	    backgroundColor: '#1a2744',
+	    borderColor: 'transparent'
+	});
     /*[/]*/
 
     document.addEventListener('DOMContentLoaded', function() {
